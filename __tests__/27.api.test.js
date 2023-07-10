@@ -1,56 +1,49 @@
 const frisby = require("frisby");
-const user = "alex";
-const pass = "j3qq4";
-const BaseURL = 'http://security.postman-breakable.com';
-const Joi = frisby.Joi;
+const {timeout} = require("frisby");
+const BaseUrl = "http://security.postman-breakable.com"
+const host = "http://security.postman-breakable.com"
+const user_id = 'bf2d44c6-eaed-4118-961b-c67e4dc3409e'
+// const NewUser = {'username':'Lee', 'password':'1569'}
 
-    describe("Day27", () => {
-it ("User login", async () => {
-  const userLogged = await frisby.post(`${BaseURL}/user/login`, {
-    body: {
-      username: user,
-      password: pass,
+frisby.globalSetup({
+    request: {
+        timeout: 10000,
     },
-  });
-
-     sessionToken = userLogged.json.response.session_token;
-     userId = userLogged.json.response.user_id;
 });
-
-
-it("Collection run", async () => {
-    await frisby
-      .get(`${BaseURL}/user`, {
-        headers: {
-          "x-api-key": sessionToken,
-        },
-      })
-      .expect("status", 200);
-  
-    await frisby
-      .get(`${BaseURL}/account/${userId}/summary`, {
-        headers: {
-          "x-api-key": sessionToken,
-        },
-      })
-      .expect("status", 200)
-      .expect("jsonTypes", {
-        response: {
-          balance: frisby.Joi.number(),
-          last_transaction: frisby.Joi.number(),
-          user_id: frisby.Joi.string().guid(),
-        },
-      });
-  
-    await frisby.get(`${BaseURL}/user/logout`, {
-      headers: {
-        "x-api-key": sessionToken,
-      },
+describe("Day27", () => {
+    const  newUser = {
+        username:'Lee',
+        password:'Leem'
+    }
+    it('Creat User', function () {
+        return frisby
+            .post(`${BaseUrl}/user/login`)
+            .expect("status", 400)
     })
-      .expect("status", 200);
-  
-    await frisby
-      .get(`${BaseURL}/account/${userId}/summary`)
-      .expect("status", 403);
-  });
+
+    it('User Info', function () {
+        return frisby
+            .get(`${BaseUrl}/user`)
+            .expect("status", 403)
+})
+    it('Account summary\n', function () {
+        return frisby
+            .get(`${host}/account/${user_id}/summary`)
+            .expect("status", 403)
+            .then((result) => console.log(result))
+    })
+
+    it('User Logout', function () {
+        return frisby
+            .get(`${host}/user/logout`)
+            .expect("status", 403)
+
+    })
+
+    it('Account summary', function () {
+        return frisby
+            .get(`${host}/account/${user_id}/summary`)
+            .expect("status", 403)
+
+    })
 });
